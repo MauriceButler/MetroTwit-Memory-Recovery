@@ -17,7 +17,7 @@
 
         private const string ApplicationName = "MetroTwit Memory Recovery";
 
-        private const string CurrentlyUsingXMb = "MetroTwit is currently Using {0} mb";
+        private const string CurrentlyUsingXMb = "{0} is currently Using {1} mb";
 
         private const string Exit = "Exit";
 
@@ -37,9 +37,9 @@
 
         private const string MinutesNotation = "mins";
 
-        private const string ProcessName = "MetroTwit";
-
         private const string RecycleNow = "Recycle Now";
+
+        private const string ApplicationToMonitor = "Application To Monitor";
 
         private const string RecycleWhenMemoryReaches = "Recycle when memory reaches";
 
@@ -163,7 +163,7 @@
         {
             Process metroTwit = null;
 
-            var metroTwitProcess = Process.GetProcessesByName(ProcessName);
+            var metroTwitProcess = Process.GetProcessesByName(Settings.Default.ProcessName);
             if (metroTwitProcess.Length > 0)
             {
                 metroTwit = metroTwitProcess[0];
@@ -247,6 +247,9 @@
                     Settings.Default.CheckInterval = GetLableAsInteger(menuItem);
                     this.timer.Interval = Settings.Default.CheckInterval;
                     break;
+                case ApplicationToMonitor:
+                    Settings.Default.ProcessName = menuItem.Text;
+                    break;
             }
 
             Settings.Default.Save();
@@ -259,10 +262,11 @@
         {
             this.contextMenu = new ContextMenu();
 
-            this.contextMenu.MenuItems.Add(new MenuItem(string.Format(CurrentlyUsingXMb, 0)));
+            this.contextMenu.MenuItems.Add(new MenuItem(string.Format(CurrentlyUsingXMb, Settings.Default.ProcessName, 0)));
             this.contextMenu.MenuItems.Add(this.CreateRecycleMenuItems());
             this.contextMenu.MenuItems.Add(this.CreateUsageCheckIntervalMenuItems());
             this.contextMenu.MenuItems.Add(new MenuItem(RecycleNow, this.Recycle));
+            this.contextMenu.MenuItems.Add(this.CreateApplciationMenuItems());
             this.contextMenu.MenuItems.Add(new MenuItem(Exit, this.ExitClick));
 
             this.contextMenu.Popup += this.UpdateMemoryUsage;
@@ -312,6 +316,21 @@
             return recycleMenuItem;
         }
 
+        private MenuItem CreateApplciationMenuItems()
+        {
+            var applicationMenuItem = new MenuItem(ApplicationToMonitor);
+
+            applicationMenuItem.MenuItems.Add(new MenuItem("MetroTwit", this.SetChecked));
+            applicationMenuItem.MenuItems.Add(new MenuItem("MetroTwitLoop", this.SetChecked));
+
+            foreach (var menuItem in applicationMenuItem.MenuItems.Cast<MenuItem>().Where(menuItem => Settings.Default.ProcessName == menuItem.Text))
+            {
+                menuItem.Checked = true;
+            }
+
+            return applicationMenuItem;
+        }
+
         /// <summary>
         ///   The setup notification icon.
         /// </summary>
@@ -347,7 +366,7 @@
         {
             var metroTwit = GetMetroTwitProcess();
 
-            this.contextMenu.MenuItems[0].Text = string.Format(CurrentlyUsingXMb, metroTwit != null ? GetMemoryUsage(metroTwit) : 0);
+            this.contextMenu.MenuItems[0].Text = string.Format(CurrentlyUsingXMb, Settings.Default.ProcessName, metroTwit != null ? GetMemoryUsage(metroTwit) : 0);
         }
 
         #endregion

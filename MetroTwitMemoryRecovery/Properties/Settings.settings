@@ -8,5 +8,8 @@
     <Setting Name="CheckInterval" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">60000</Value>
     </Setting>
+    <Setting Name="ProcessName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MetroTwit</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
